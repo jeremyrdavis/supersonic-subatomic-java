@@ -24,27 +24,4 @@ public class GreetingResource {
         return greeting;
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Greeting addGreeting(Greeting greeting) {
-
-        Log.debugf("Adding greeting %s", greeting);
-
-        greetingRepository.persist(greeting);
-
-        Log.debugf("Added greeting %s", greeting);
-
-        return greeting;
-    }
-
-    @GET
-    @Path("/all")
-    public List<Greeting> getAllGreetings() {
-
-        Log.debugf("Returning %s greetings", greetingRepository.count());
-
-        return greetingRepository.listAll();
-    }
 }
