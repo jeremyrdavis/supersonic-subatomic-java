@@ -1,6 +1,7 @@
 package com.redhat.demos;
 
 import io.quarkus.logging.Log;
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -14,14 +15,23 @@ public class ApiResource {
     @Inject
     GreetingRepository greetingRepository;
 
+    @Inject
+    KafkaAdapter kafkaAdapter;
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Greeting addGreeting(Greeting greeting) {
-        Log.debugf("Adding greeting %s", greeting);
-        greetingRepository.persist(greeting);
+
+        QuarkusTransaction.requiringNew().run(() -> {
+            greetingRepository.persist(greeting);
+        });
         Log.debugf("Added greeting %s", greeting);
+
+        kafkaAdapter.sendGreeting(greeting);
+        Log.debugf("Sent greeting %s", greeting);
+
         return greeting;
     }
 
